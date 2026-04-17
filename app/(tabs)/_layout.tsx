@@ -1,35 +1,27 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { useNavigation } from "@react-navigation/native";
+import { Tabs } from "expo-router";
+import { Pressable, Text } from "react-native";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+function DrawerButton() {
+  const navigation = useNavigation();
+  return (
+    <Pressable onPress={() => navigation.openDrawer()}>
+      <Text style={{ fontSize: 18, marginLeft: 10 }}>☰ </Text>
+    </Pressable>
+  );
+}
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
+        headerLeft: () => <DrawerButton />,
+      }}
+    >
+      <Tabs.Screen name="index" options={{ title: "Home" }} />
+      <Tabs.Screen name="mybooks" options={{ title: "My Books" }} />
+      <Tabs.Screen name="profile" options={{ title: "Profile" }} />
+      <Tabs.Screen name="settings" options={{ title: "Settings", href: null }} />
     </Tabs>
   );
 }

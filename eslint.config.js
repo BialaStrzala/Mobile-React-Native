@@ -6,5 +6,7 @@ module.exports = defineConfig([
   expoConfig,
   {
     ignores: ['dist/*'],
+    presets: ["babel-preset-expo"],
+    plugins: ["react-native-reanimated/plugin"],
   },
 ]);
