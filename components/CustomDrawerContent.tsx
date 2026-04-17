@@ -1,13 +1,39 @@
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
+import { supabase } from "../lib/supabase";
 
 export default function CustomDrawerContent(props: any) {
   const router = useRouter();
+  const [username, setUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("users")
+        .select("username")
+        .eq("id", user.id)
+        .single();
+
+      setUsername(data?.username ?? "User");
+    };
+
+    loadUser();
+  }, []);
+
   return (
     <DrawerContentScrollView {...props}>
       <View style={{ padding: 16 }}>
-        <Text>Username123</Text>
+        <Text style={{ fontSize: 16, fontWeight: "600" }}>
+          {username ?? "Loading..."}
+        </Text>
       </View>
 
       <DrawerItem
