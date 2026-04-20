@@ -5,7 +5,11 @@ const MyBooks = () => {
   return (
     <View>
       <Text>MyBooks
-    
+        <View>
+          <View>
+            <Text>Title</Text>
+          </View>
+        </View>
       </Text>
     </View>
   )

@@ -22,6 +22,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="mybooks" options={{ title: "My Books" }} />
       <Tabs.Screen name="profile" options={{ title: "Profile" }} />
       <Tabs.Screen name="settings" options={{ title: "Settings", href: null }} />
+      <Tabs.Screen name="newbook" options={{ title: "New Book", href: null }} />
     </Tabs>
   );
 }

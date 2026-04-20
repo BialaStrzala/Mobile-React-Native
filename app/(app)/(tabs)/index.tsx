@@ -7,17 +7,17 @@ const HomeScreen = () => {
     return (
         <View>
             <View>
-                <Text>Witaj z powrotem!</Text>
-                <Text>Liczba przeczytanych książek:</Text>
-                <Text>Liczba książek w trakcie:</Text>
-                <Text>Liczba książek do przeczytania:</Text>
-                <Button title="Dodaj nową książkę" onPress={() => {}} />
+                <Text>Welcome back!</Text>
+                <Text>Books read:</Text>
+                <Text>Books in progress:</Text>
+                <Text>Books planned:</Text>
+                <Button title="Add new book" onPress={() => {}} />
             </View>
             <View>
-                <Text>Nowo dodane</Text>
+                <Text>Newly added</Text>
             </View>
             <View>
-                <Text>Wszystkie książki</Text>
+                <Text>All books</Text>
             </View>
         </View>
     )

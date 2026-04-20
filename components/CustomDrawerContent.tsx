@@ -1,12 +1,17 @@
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Button, Text, View } from "react-native";
 import { supabase } from "../lib/supabase";
 
 export default function CustomDrawerContent(props: any) {
   const router = useRouter();
   const [username, setUsername] = useState<string | null>(null);
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+    router.push("/(auth)")
+  }
 
   useEffect(() => {
     const loadUser = async () => {
@@ -34,6 +39,7 @@ export default function CustomDrawerContent(props: any) {
         <Text style={{ fontSize: 16, fontWeight: "600" }}>
           {username ?? "Loading..."}
         </Text>
+        <Button title="Log out" onPress={logout}/>
       </View>
 
       <DrawerItem

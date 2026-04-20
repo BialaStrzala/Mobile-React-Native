@@ -1,29 +1,38 @@
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from 'react-native';
+import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
 
 const Settings = () => {
   const router = useRouter();
   const [userId, setUserId] = useState<number>(0);
-  const [email, setEmail] = useState<string | null>(null);
-  const [password, setPassword] = useState<string | null>(null);
-  const [username, setUsername] = useState<string | null>(null);
+  const [email, setEmail] = useState<string>('null');
+  const [password, setPassword] = useState<string>('');
+  const [passwordRetype, setPasswordRetype] = useState<string>('');
+  const [username, setUsername] = useState<string>('');
 
-  //psw, auth.email
-  const changeSettings = async () => {
+  const changeUsername = async () => {
     const { data, error } = await supabase.from("users").update({
       username: username,
-      email: email
     }).eq("id", userId);
-    router.push("/(app)/(tabs)/profile");
+    router.push("/(app)/(tabs)/profile"); //?
   };
+
+  //In order to use the updateUser() method, the user needs to be signed in first.
+  const changePassword = async () => {
+    if(!(password == passwordRetype)){
+      return;
+    }
+    const { error } = await supabase.auth.updateUser({password: password})
+  }
+
+  const changeEmail = async () => {
+    const { error } = await supabase.auth.updateUser({email: email})
+  }
 
   useEffect(() => {
     const loadUserData = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { user }, } = await supabase.auth.getUser();
 
       if (!user) return;
 
@@ -41,14 +50,19 @@ const Settings = () => {
 
   return (
     <View>
-      <Text>settings</Text>
+      <Text>Settings</Text>
       <View>
-        <Text>Edytuj profil</Text>
+        <Text>Edit profile</Text>
         <View>
-          <TextInput placeholder="Username" onChangeText={setUsername} />
-          <TextInput placeholder="Email" onChangeText={setEmail} />
+          <TextInput placeholder="Username" value={username} onChangeText={setUsername} />
+          <Button title="Change username" onPress={changeUsername} />
+          
+          <TextInput placeholder="Email" value={email} onChangeText={setEmail} />
+          <Button title="Change email" onPress={changeEmail} />
+
           <TextInput placeholder="Password" secureTextEntry onChangeText={setPassword} />
-          <Button title="Change Settings" onPress={changeSettings} />
+          <TextInput placeholder="Confirm password" secureTextEntry onChangeText={setPasswordRetype} />
+          <Button title="Change password" onPress={changePassword} />
         </View>
       </View>
     </View>
