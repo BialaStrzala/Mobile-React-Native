@@ -1,20 +1,23 @@
+import NewestBookCarousel from "@/components/NewestBookCarousel";
+import { colors, radius } from "@/lib/theme";
 import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 import React from 'react';
-import { Button, Text, View } from 'react-native';
+import { Button, StyleSheet, Text, View } from 'react-native';
 
 const HomeScreen = () => {
     const navigation = useNavigation();
     return (
-        <View>
+        <View style={styles.container}>
             <View>
                 <Text>Welcome back!</Text>
-                <Text>Books read:</Text>
-                <Text>Books in progress:</Text>
-                <Text>Books planned:</Text>
-                <Button title="Add new book" onPress={() => {}} />
+                <View style={styles.miniStatsCard}>
+                    <Text>You are reading x books</Text>
+                </View>
+                <Button title="Add new book" onPress={() => {router.push("/(tabs)/newbook")}} />
             </View>
             <View>
-                <Text>Newly added</Text>
+                <NewestBookCarousel />
             </View>
             <View>
                 <Text>All books</Text>
@@ -25,3 +28,14 @@ const HomeScreen = () => {
 
 export default HomeScreen
 
+const styles = StyleSheet.create({
+    container: {
+        backgroundColor: colors.backgroundColor,
+        width: "100%",
+        height: "100%",
+    },
+    miniStatsCard: {
+        backgroundColor: colors.cardColor,
+        borderRadius: radius.md,
+    }
+})
