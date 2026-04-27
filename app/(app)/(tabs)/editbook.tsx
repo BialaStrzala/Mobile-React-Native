@@ -9,7 +9,7 @@ const STATUS_OPTIONS = ['Planning', 'Reading', 'Finished', 'Discontinued'];
 const EditBook = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
-  
+
   const [status, setStatus] = useState(params.status as string || 'Planning');
   const [rating, setRating] = useState(parseInt(params.rating as string) || 0);
   const [notes, setNotes] = useState(params.notes as string || '');
@@ -37,8 +37,8 @@ const EditBook = () => {
       'Are you sure you want to remove this book from your list?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
+        {
+          text: 'Delete',
           style: 'destructive',
           onPress: async () => {
             try {
@@ -93,7 +93,7 @@ const EditBook = () => {
               <Text
                 style={[
                   styles.star,
-                  { color: star <= rating ? '#f39c12' : '#ddd' },
+                  { color: star <= rating ? colors.colorOrange : colors.colorLightGray },
                 ]}
               >
                 ★
@@ -122,8 +122,8 @@ const EditBook = () => {
       </View>
 
       <View style={styles.buttonContainer}>
-        <Button title="Save Changes" onPress={handleSave} color={colors.primary} />
-        <Button title="Delete Book" onPress={handleDelete} color="#e74c3c" />
+        <Button title="Save Changes" onPress={handleSave} color={colors.colorGreen} />
+        <Button title="Delete Book" onPress={handleDelete} color={colors.colorRed} />
       </View>
     </ScrollView>
   );

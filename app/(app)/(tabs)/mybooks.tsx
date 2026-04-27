@@ -47,7 +47,7 @@ const MyBooks = () => {
   const handleBookPress = (book: BookData) => {
     router.push({
       pathname: "/(app)/(tabs)/editbook",
-      params: { 
+      params: {
         bookId: book.id,
         title: book.books.title,
         author: book.books.author,
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   errorText: {
-    color: "#e74c3c",
+    color: colors.colorRed,
     padding: 16,
     textAlign: "center",
   },

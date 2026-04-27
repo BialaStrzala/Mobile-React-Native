@@ -1,4 +1,5 @@
-import { addNewBook } from '@/lib/bookmanager'
+import { addNewBook, getBookById } from '@/lib/bookmanager'
+import { colors } from '@/lib/theme'
 import { router } from 'expo-router'
 import React, { useState } from 'react'
 import { Alert, Button, StyleSheet, Text, View } from 'react-native'
@@ -7,7 +8,7 @@ import { TextInput } from 'react-native-gesture-handler'
 const NewBook = () => {
   const [title, setTitle] = useState("")
   const [author, setAuthor] = useState("")
-  const [status, setStatus] = useState("Planning")
+  //const [status, setStatus] = useState("Planning")
 
   const handleAdd = async () => {
     if (!title.trim() || !author.trim()) {
@@ -20,9 +21,22 @@ const NewBook = () => {
       Alert.alert("Success", result.message)
       setTitle("")
       setAuthor("")
-      setStatus("Planning")
-      router.push("/(tabs)/mybooks")
-    } catch (error: any) {
+      //setStatus("Planning")
+      //router.push("/(tabs)/mybooks")
+      const newBook = await getBookById(result.bookId)
+      router.push({
+        pathname: "/(app)/(tabs)/editbook",
+        params: {
+          bookId: result?.bookId || result?.bookId.toString(),
+          title: newBook?.title,
+          author: newBook?.author,
+          status: "Planning",
+          rating: "",
+          notes: "",
+        },
+      });
+    }
+    catch (error: any) {
       Alert.alert("Error", error.message)
     }
   }
@@ -35,9 +49,7 @@ const NewBook = () => {
         <TextInput placeholder="Title" value={title} onChangeText={setTitle} />
         <Text>Author</Text>
         <TextInput placeholder="Author" value={author} onChangeText={setAuthor} />
-        <Button title="Add" onPress={handleAdd} />
-        <TextInput placeholder="Status" value={status} onChangeText={setStatus} />
-        {/* Choice input: Planning, Reading, Finished, Discontinued */}
+        <Button title="Add" onPress={handleAdd} color={colors.colorGreen} />
       </View>
     </View>
   )

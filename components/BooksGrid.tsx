@@ -42,12 +42,12 @@ const BookCard: React.FC<BookCardProps> = ({ book, onPress }) => {
                 key={star}
                 name="star"
                 size={12}
-                color={star <= starRating ? "#f39c12" : "#ddd"}
+                color={star <= starRating ? colors.colorOrange : colors.colorLightGray}
               />
             ))}
           </View>
         </View>
-        
+
         {/* Book title and author below */}
         <View style={styles.bookInfo}>
           <Text style={styles.bookTitle} numberOfLines={2}>
@@ -68,10 +68,10 @@ interface BooksGridProps {
   numColumns?: number;
 }
 
-const BooksGrid: React.FC<BooksGridProps> = ({ 
-  books, 
+const BooksGrid: React.FC<BooksGridProps> = ({
+  books,
   onBookPress,
-  numColumns = 3 
+  numColumns = 3
 }) => {
   // Group books into rows of 3
   const rows: BookData[][] = [];

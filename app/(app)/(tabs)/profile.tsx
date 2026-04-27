@@ -6,13 +6,13 @@ import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-interface UserAuthData{
+interface UserAuthData {
     id: any,
     username: any,
     email: any,
     created_at?: any
 }
-interface UserBookData{
+interface UserBookData {
     id: any,
     book_id: any,
     status: any,
@@ -26,9 +26,9 @@ interface UserBookData{
 }
 
 const ProfileScreen = () => {
-    const [ userData, setUserData ] = useState<UserAuthData | null>(null);
-    const [ userBookData, setUserBookData ] = useState<UserBookData[]>([]);
-    const [ loading, setLoading ] = useState(true);
+    const [userData, setUserData] = useState<UserAuthData | null>(null);
+    const [userBookData, setUserBookData] = useState<UserBookData[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const loadData = useCallback(async () => {
         try {
@@ -36,7 +36,7 @@ const ProfileScreen = () => {
             //user data
             const { data: { user }, } = await supabase.auth.getUser();
             if (!user) return;
-            
+
             const { data: userProfile } = await supabase
                 .from("users")
                 .select("id, username, email, created_at")
@@ -50,7 +50,7 @@ const ProfileScreen = () => {
                 .select("id, book_id, status, rating, notes, created_at, books(title, author)")
                 .eq("user_uid", user.id)
                 .order("created_at", { ascending: false });
-            
+
             setUserBookData(books || []);
         } catch (err) {
             console.error("Error loading profile:", err);
@@ -83,9 +83,9 @@ const ProfileScreen = () => {
     const readingCount = userBookData.filter(b => b.status === "Reading").length;
     const planningCount = userBookData.filter(b => b.status === "Planning").length;
     const discontinuedCount = userBookData.filter(b => b.status === "Discontinued").length;
-    
+
     const ratings = userBookData.filter(b => b.rating !== null).map(b => b.rating);
-    const averageRating = ratings.length > 0 
+    const averageRating = ratings.length > 0
         ? (ratings.reduce((sum, r) => sum + r, 0) / ratings.length).toFixed(1)
         : "N/A";
 
@@ -137,7 +137,7 @@ const ProfileScreen = () => {
                                         key={star}
                                         name="star"
                                         size={12}
-                                        color={star <= (latestBook.rating || 0) ? "#f39c12" : "#ddd"}
+                                        color={star <= (latestBook.rating || 0) ? colors.colorOrange : colors.colorLightGray}
                                     />
                                 ))}
                             </View>
@@ -157,7 +157,7 @@ const ProfileScreen = () => {
             {/* Statistics Card */}
             <View style={styles.card}>
                 <Text style={styles.cardTitle}>Statistics</Text>
-                
+
                 <View style={styles.statItem}>
                     <Text style={styles.statLabel}>Total Books</Text>
                     <Text style={styles.statValue}>{totalBooks}</Text>
@@ -165,22 +165,22 @@ const ProfileScreen = () => {
 
                 <View style={styles.statsGrid}>
                     <View style={styles.statBox}>
-                        <FontAwesome name="check-circle" size={20} color="#2ecc71" />
+                        <FontAwesome name="check-circle" size={20} color={colors.colorGreen} />
                         <Text style={styles.statBoxValue}>{finishedCount}</Text>
                         <Text style={styles.statBoxLabel}>Finished</Text>
                     </View>
                     <View style={styles.statBox}>
-                        <FontAwesome name="hourglass-half" size={20} color="#3498db" />
+                        <FontAwesome name="hourglass-half" size={20} color={colors.colorBlue} />
                         <Text style={styles.statBoxValue}>{readingCount}</Text>
                         <Text style={styles.statBoxLabel}>Reading</Text>
                     </View>
                     <View style={styles.statBox}>
-                        <FontAwesome name="book" size={20} color="#f39c12" />
+                        <FontAwesome name="book" size={20} color={colors.colorOrange} />
                         <Text style={styles.statBoxValue}>{planningCount}</Text>
                         <Text style={styles.statBoxLabel}>Planning</Text>
                     </View>
                     <View style={styles.statBox}>
-                        <FontAwesome name="times-circle" size={20} color="#e74c3c" />
+                        <FontAwesome name="times-circle" size={20} color={colors.colorRed} />
                         <Text style={styles.statBoxValue}>{discontinuedCount}</Text>
                         <Text style={styles.statBoxLabel}>Dropped</Text>
                     </View>
@@ -189,7 +189,7 @@ const ProfileScreen = () => {
                 <View style={styles.statItem}>
                     <Text style={styles.statLabel}>Average Rating</Text>
                     <View style={styles.avgRatingRow}>
-                        <FontAwesome name="star" size={18} color="#f39c12" />
+                        <FontAwesome name="star" size={18} color={colors.colorOrange} />
                         <Text style={styles.avgRatingValue}>{averageRating}</Text>
                     </View>
                 </View>

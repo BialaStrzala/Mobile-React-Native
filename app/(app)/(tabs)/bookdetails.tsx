@@ -28,7 +28,7 @@ interface UserBookData {
 const BookDetails = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
-  
+
   const bookId = parseInt(params.bookId as string);
   const [bookDetails, setBookDetails] = useState<BookDetails | null>(null);
   const [userBook, setUserBook] = useState<UserBookData | null>(null);
@@ -43,7 +43,7 @@ const BookDetails = () => {
       setLoading(true);
       const details = await getBookDetails(bookId);
       setBookDetails(details);
-      
+
       const userBookData = await checkUserHasBook(bookId);
       setUserBook(userBookData);
     } catch (err) {
@@ -70,9 +70,9 @@ const BookDetails = () => {
     }
     //add book to user_books
     else {
-      try{
+      try {
         await addUserBook(bookId, bookDetails?.title || "Unknown", bookDetails?.author || "Unknown", "Planning");
-        
+
         // Get the newly created user_book entry
         const { data: { user } } = await supabase.auth.getUser();
         const { data: newUserBook } = await supabase
@@ -81,7 +81,7 @@ const BookDetails = () => {
           .eq("user_uid", user?.id)
           .eq("book_id", bookId)
           .single();
-        
+
         router.push({
           pathname: "/(app)/(tabs)/editbook",
           params: {
@@ -127,11 +127,11 @@ const BookDetails = () => {
             {bookDetails.title.charAt(0).toUpperCase()}
           </Text>
         </View>
-        
+
         <View style={styles.bookInfo}>
           <Text style={styles.title}>{bookDetails.title}</Text>
           <Text style={styles.author}>{bookDetails.author}</Text>
-          
+
           {/* Average Rating */}
           <View style={styles.ratingRow}>
             {[1, 2, 3, 4, 5].map((star) => (
@@ -139,14 +139,14 @@ const BookDetails = () => {
                 key={star}
                 name="star"
                 size={16}
-                color={star <= Math.round(bookDetails.averageRating) ? "#f39c12" : "#ddd"}
+                color={star <= Math.round(bookDetails.averageRating) ? colors.colorOrange : colors.colorLightGray}
               />
             ))}
             <Text style={styles.ratingText}>
-                {bookDetails.averageRating/5}
+              {bookDetails.averageRating / 5}
             </Text>
             <Text>
-                {bookDetails.totalRatings > 0 && bookDetails.averageRating > 0 ? `${bookDetails.totalRatings} ratings` : "No ratings yet"}
+              {bookDetails.totalRatings > 0 && bookDetails.averageRating > 0 ? `${bookDetails.totalRatings} ratings` : "No ratings yet"}
             </Text>
           </View>
         </View>
@@ -155,20 +155,20 @@ const BookDetails = () => {
       {/* Stats Card */}
       <View style={styles.statsCard}>
         <Text style={styles.statsTitle}>Community Reading</Text>
-        
+
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <FontAwesome name="book" size={20} color={colors.primary} />
             <Text style={styles.statNumber}>{bookDetails.planningCount}</Text>
             <Text style={styles.statLabel}>Planning</Text>
           </View>
-          
+
           <View style={styles.statItem}>
             <FontAwesome name="hourglass-half" size={20} color={colors.primary} />
             <Text style={styles.statNumber}>{bookDetails.readingCount}</Text>
             <Text style={styles.statLabel}>Reading</Text>
           </View>
-          
+
           <View style={styles.statItem}>
             <FontAwesome name="check-circle" size={20} color={colors.primary} />
             <Text style={styles.statNumber}>{bookDetails.finishedCount}</Text>
@@ -203,7 +203,7 @@ const BookDetails = () => {
                     key={star}
                     name="star"
                     size={14}
-                    color={star <= userBook.rating! ? "#f39c12" : "#ddd"}
+                    color={star <= userBook.rating! ? colors.colorOrange : colors.colorLightGray}
                   />
                 ))}
               </View>
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginBottom: 16,
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   bookInitial: {
-    color: "#fff",
+    color: colors.cardColor,
     fontSize: 32,
     fontWeight: "bold",
   },
@@ -264,12 +264,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
+    color: colors.textMuted,
     marginBottom: 4,
   },
   author: {
     fontSize: 14,
-    color: "#666",
+    color: colors.textLightMuted,
     marginBottom: 8,
   },
   ratingRow: {
@@ -279,11 +279,11 @@ const styles = StyleSheet.create({
   ratingText: {
     marginLeft: 8,
     fontSize: 14,
-    color: "#333",
+    color: colors.textMuted,
   },
   totalRatings: {
     fontSize: 12,
-    color: "#999",
+    color: colors.textLightMuted,
     marginLeft: 4,
   },
   statsCard: {
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 16,
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
   statsTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#333",
+    color: colors.textMuted,
     marginBottom: 16,
     textAlign: "center",
   },
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    color: "#666",
+    color: colors.textLightMuted,
     marginTop: 2,
   },
   buttonContainer: {
@@ -345,13 +345,13 @@ const styles = StyleSheet.create({
   },
   userBookLabel: {
     fontSize: 12,
-    color: "#666",
+    color: colors.textLightMuted,
     marginRight: 8,
   },
   userBookValue: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#333",
+    color: colors.textMuted,
   },
   userRatingStars: {
     flexDirection: "row",

@@ -4,25 +4,28 @@ import { useNavigation } from "@react-navigation/native";
 import { router } from "expo-router";
 import React from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
+import { ScrollView } from "react-native-gesture-handler";
 
 const HomeScreen = () => {
     const navigation = useNavigation();
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
             <View>
-                <Text>Welcome back!</Text>
-                <View style={styles.miniStatsCard}>
-                    <Text>You are reading x books</Text>
+                <View>
+                    <Text>Welcome back!</Text>
+                    <View style={styles.miniStatsCard}>
+                        <Text>You are reading x books</Text>
+                    </View>
+                    <Button title="Add new book" onPress={() => { router.push("/(tabs)/newbook") }} />
                 </View>
-                <Button title="Add new book" onPress={() => {router.push("/(tabs)/newbook")}} />
+                <View>
+                    <NewestBookCarousel />
+                </View>
+                <View>
+                    <Text>All books</Text>
+                </View>
             </View>
-            <View>
-                <NewestBookCarousel />
-            </View>
-            <View>
-                <Text>All books</Text>
-            </View>
-        </View>
+        </ScrollView>
     )
 }
 
@@ -33,6 +36,9 @@ const styles = StyleSheet.create({
         backgroundColor: colors.backgroundColor,
         width: "100%",
         height: "100%",
+    },
+    content: {
+        padding: 10,
     },
     miniStatsCard: {
         backgroundColor: colors.cardColor,

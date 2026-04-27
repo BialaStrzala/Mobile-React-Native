@@ -1,5 +1,5 @@
+import { globalStyles } from "@/lib/globalStyle";
 import { supabase } from "@/lib/supabase";
-import { colors, sizes } from "@/lib/theme";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
@@ -35,32 +35,32 @@ export default function Register() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}><Text style={styles.headerText}>Register</Text></View>
+    <View style={globalStyles.mainContainer}>
+      <View style={globalStyles.header}><Text style={globalStyles.headerText}>Register</Text></View>
 
       <View style={styles.centerWrapper}>
-        <View style={styles.card}>
-          <Text style={styles.titleText}>Welcome!</Text>
+        <View style={globalStyles.card}>
+          <Text style={globalStyles.titleText}>Welcome!</Text>
           <View style={styles.loginForm}>
-            <TextInput style={styles.inputField} placeholder="Username" onChangeText={setUsername} />
-            <TextInput style={styles.inputField} placeholder="Email" onChangeText={setEmail} />
-            <TextInput style={styles.inputField} placeholder="Password" secureTextEntry onChangeText={setPassword} />
+            <TextInput style={globalStyles.inputField} placeholder="Username" onChangeText={setUsername} />
+            <TextInput style={globalStyles.inputField} placeholder="Email" onChangeText={setEmail} />
+            <TextInput style={globalStyles.inputField} placeholder="Password" secureTextEntry onChangeText={setPassword} />
             <Pressable
               onPress={handleRegister}
               style={({ pressed }) => [
-                styles.button,
-                pressed && styles.buttonPressed,
+                globalStyles.mainButton,
+                pressed && globalStyles.mainButtonPressed,
               ]}>
-              <Text style={styles.buttonText}>Register</Text>
+              <Text style={globalStyles.mainButtonText}>Register</Text>
             </Pressable>
             <Pressable
               onPress={() => router.push("/(auth)/login")}
               style={({ pressed }) => [
-                styles.secondaryButton,
-                pressed && styles.secondaryButtonPressed,
+                globalStyles.secondaryButton,
+                pressed && globalStyles.secondaryButtonPressed,
               ]}
             >
-              <Text style={styles.secondaryButtonText}>
+              <Text style={globalStyles.secondaryButtonText}>
                 Have an account? Log in
               </Text>
             </Pressable>
@@ -72,85 +72,14 @@ export default function Register() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.backgroundColor,
-    width: "100%",
-    height: "100%",
-  },
   centerWrapper: {
     flex: 1,
     marginTop: 50,
     alignItems: "center",
   },
-  card: {
-    backgroundColor: colors.cardColor,
-    margin: 20,
-    borderRadius: 15,
-    width: "80%",
-    alignContent: "center",
-    justifyContent: "center",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-  },
-  header: {
-    height: 80,
-    alignItems: "center",
-    fontWeight: "bold",
-    marginBottom: 16,
-    backgroundColor: colors.primary,
-  },
-  headerText: {
-    marginTop: 35,
-    fontSize: sizes.headerText,
-    fontWeight: "bold",
-    letterSpacing: 1,
-    color: "#fff",
-  },
-  loginForm:{
+  loginForm: {
     justifyContent: "center",
     padding: 15,
     gap: 15,
   },
-  inputField: {
-    borderWidth: 2,
-    borderColor: "#ebe8dd",
-    padding: 10,
-    borderRadius: 5,
-  },
-  button: {
-    backgroundColor: colors.primary,
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  buttonPressed: {
-    backgroundColor: colors.primaryDark,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-  secondaryButton: {
-    padding: 12,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  secondaryButtonPressed: {
-    backgroundColor: colors.backgroundColor,
-  },
-  secondaryButtonText: {
-    color: colors.primary,
-    fontWeight: "500",
-  },
-  titleText: {
-    marginTop: 15,
-    alignSelf: "center",
-    fontSize: sizes.titleText,
-    fontWeight: "bold",
-    letterSpacing: 1,
-    marginBottom: 10,
-    color: colors.primary,
-  }
 })
