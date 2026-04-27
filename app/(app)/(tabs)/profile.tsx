@@ -57,7 +57,7 @@ const ProfileScreen = () => {
         } finally {
             setLoading(false);
         }
-    });
+    }, []);
 
     // Reload data whenever the screen comes into focus
     useFocusEffect(
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
         padding: 16,
         marginBottom: 16,
         elevation: 2,
-        shadowColor: "#000",
+        shadowColor: colors.shadow,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 2,
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     cardTitle: {
         fontSize: 16,
         fontWeight: "600",
-        color: "#333",
+        color: colors.textMuted,
         marginBottom: 12,
     },
     profileRow: {
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     avatarText: {
-        color: "#fff",
+        color: colors.cardColor,
         fontSize: 24,
         fontWeight: "bold",
     },
@@ -255,11 +255,11 @@ const styles = StyleSheet.create({
     username: {
         fontSize: 20,
         fontWeight: "bold",
-        color: "#333",
+        color: colors.textMuted,
     },
     joinDate: {
         fontSize: 13,
-        color: "#666",
+        color: colors.textLightMuted,
         marginTop: 2,
     },
     latestBookRow: {
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     bookInitial: {
-        color: "#fff",
+        color: colors.cardColor,
         fontSize: 20,
         fontWeight: "bold",
     },
@@ -285,11 +285,11 @@ const styles = StyleSheet.create({
     bookTitle: {
         fontSize: 14,
         fontWeight: "600",
-        color: "#333",
+        color: colors.textMuted,
     },
     bookAuthor: {
         fontSize: 12,
-        color: "#666",
+        color: colors.textLightMuted,
         marginTop: 2,
     },
     ratingRow: {

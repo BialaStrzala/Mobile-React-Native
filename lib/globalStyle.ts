@@ -50,6 +50,11 @@ export const globalStyles = StyleSheet.create({
         color: colors.primary,
     },
 
+    scrollViewContent: {
+        padding: 16,
+        paddingBottom: 32,
+    },
+
     mainButton: {
         backgroundColor: colors.primary,
         padding: 14,
@@ -63,6 +68,7 @@ export const globalStyles = StyleSheet.create({
         color: colors.cardColor,
         fontWeight: "600",
     },
+
     secondaryButton: {
         padding: 12,
         borderRadius: radius.md,

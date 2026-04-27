@@ -1,7 +1,9 @@
+import { globalStyles } from "@/lib/globalStyle";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ScrollView } from "react-native-gesture-handler";
 
 const Settings = () => {
   const router = useRouter();
@@ -20,14 +22,14 @@ const Settings = () => {
 
   //In order to use the updateUser() method, the user needs to be signed in first.
   const changePassword = async () => {
-    if(!(password == passwordRetype)){
+    if (!(password == passwordRetype)) {
       return;
     }
-    const { error } = await supabase.auth.updateUser({password: password})
+    const { error } = await supabase.auth.updateUser({ password: password })
   }
 
   const changeEmail = async () => {
-    const { error } = await supabase.auth.updateUser({email: email})
+    const { error } = await supabase.auth.updateUser({ email: email })
   }
 
   useEffect(() => {
@@ -49,23 +51,37 @@ const Settings = () => {
   }, []);
 
   return (
-    <View>
-      <Text>Settings</Text>
-      <View>
-        <Text>Edit profile</Text>
+    <ScrollView style={globalStyles.mainContainer} contentContainerStyle={globalStyles.scrollViewContent}>
+      <View style={globalStyles.card}>
+        <Text style={globalStyles.titleText}>Settings</Text>
         <View>
-          <TextInput placeholder="Username" value={username} onChangeText={setUsername} />
-          <Button title="Change username" onPress={changeUsername} />
-          
-          <TextInput placeholder="Email" value={email} onChangeText={setEmail} />
-          <Button title="Change email" onPress={changeEmail} />
+          <Text style={globalStyles.titleText}>Edit profile</Text>
+          <View>
+            <TextInput placeholder="Username" value={username} onChangeText={setUsername} style={globalStyles.inputField} />
+            <Pressable onPress={changeUsername}
+              style={({ pressed }) => [
+                globalStyles.mainButton, pressed && globalStyles.mainButtonPressed,]}>
+              <Text style={globalStyles.mainButtonText}>Change username</Text>
+            </Pressable>
 
-          <TextInput placeholder="Password" secureTextEntry onChangeText={setPassword} />
-          <TextInput placeholder="Confirm password" secureTextEntry onChangeText={setPasswordRetype} />
-          <Button title="Change password" onPress={changePassword} />
+            <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={globalStyles.inputField} />
+            <Pressable onPress={changeEmail}
+              style={({ pressed }) => [
+                globalStyles.mainButton, pressed && globalStyles.mainButtonPressed,]}>
+              <Text style={globalStyles.mainButtonText}>Change email</Text>
+            </Pressable>
+
+            <TextInput placeholder="Password" secureTextEntry onChangeText={setPassword} style={globalStyles.inputField} />
+            <TextInput placeholder="Confirm password" secureTextEntry onChangeText={setPasswordRetype} style={globalStyles.inputField} />
+            <Pressable onPress={changePassword}
+              style={({ pressed }) => [
+                globalStyles.mainButton, pressed && globalStyles.mainButtonPressed,]}>
+              <Text style={globalStyles.mainButtonText}>Change password</Text>
+            </Pressable>
+          </View>
         </View>
       </View>
-    </View>
+    </ScrollView>
   )
 }
 

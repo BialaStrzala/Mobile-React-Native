@@ -1,4 +1,5 @@
 import { addNewBook, getBookById } from '@/lib/bookmanager'
+import { globalStyles } from '@/lib/globalStyle'
 import { colors } from '@/lib/theme'
 import { router } from 'expo-router'
 import React, { useState } from 'react'
@@ -42,14 +43,18 @@ const NewBook = () => {
   }
 
   return (
-    <View>
-      <Text>NewBook</Text>
-      <View>
-        <Text>Title</Text>
-        <TextInput placeholder="Title" value={title} onChangeText={setTitle} />
-        <Text>Author</Text>
-        <TextInput placeholder="Author" value={author} onChangeText={setAuthor} />
-        <Button title="Add" onPress={handleAdd} color={colors.colorGreen} />
+    <View style={globalStyles.mainContainer}>
+      <View style={styles.centerWrapper}>
+        <View style={globalStyles.card}>
+          <Text style={globalStyles.titleText}>Welcome back!</Text>
+          <View style={styles.container}>
+            <Text>Title</Text>
+            <TextInput placeholder="Title" value={title} onChangeText={setTitle} />
+            <Text>Author</Text>
+            <TextInput placeholder="Author" value={author} onChangeText={setAuthor} />
+            <Button title="Add" onPress={handleAdd} color={colors.colorGreen} />
+          </View>
+        </View>
       </View>
     </View>
   )
@@ -57,4 +62,15 @@ const NewBook = () => {
 
 export default NewBook
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  centerWrapper: {
+    flex: 1,
+    marginTop: 50,
+    alignItems: "center",
+  },
+  container: {
+    justifyContent: "center",
+    padding: 15,
+    gap: 15,
+  },
+})

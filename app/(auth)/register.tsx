@@ -3,12 +3,15 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { colors } from "@/lib/theme";
 
 export default function Register() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleRegister = async () => {
     const { data, error } = await supabase.auth.signUp({
@@ -18,6 +21,7 @@ export default function Register() {
 
     if (error) {
       console.log(error.message);
+      setErrorMessage(error.message);
       return;
     }
 
@@ -31,6 +35,8 @@ export default function Register() {
         email: user.email,
       });
     }
+    setSuccessMessage("Registering...");
+    setErrorMessage("";)
     router.push("/(app)/(tabs)");
   };
 
@@ -42,9 +48,13 @@ export default function Register() {
         <View style={globalStyles.card}>
           <Text style={globalStyles.titleText}>Welcome!</Text>
           <View style={styles.loginForm}>
+            <Text style={{ color: colors.colorRed }}>{errorMessage == "" ? errorMessage : ""}</Text>
+            <Text style={{ color: colors.colorGreen }}>{successMessage == "" ? successMessage : ""}</Text>
+
             <TextInput style={globalStyles.inputField} placeholder="Username" onChangeText={setUsername} />
             <TextInput style={globalStyles.inputField} placeholder="Email" onChangeText={setEmail} />
             <TextInput style={globalStyles.inputField} placeholder="Password" secureTextEntry onChangeText={setPassword} />
+            
             <Pressable
               onPress={handleRegister}
               style={({ pressed }) => [

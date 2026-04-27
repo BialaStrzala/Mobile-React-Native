@@ -1,5 +1,6 @@
 import { globalStyles } from "@/lib/globalStyle";
 import { supabase } from "@/lib/supabase";
+import { colors } from "@/lib/theme";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
@@ -7,17 +8,21 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleLogin = async () => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    console.log("Login attempt:", email, password);
     if (error) {
       console.log(error.message);
+      setErrorMessage(error.message);
       return;
     }
+    setSuccessMessage("Logging in...");
+    setErrorMessage("");
     router.push("/(app)");
   };
 
@@ -29,8 +34,12 @@ export default function Login() {
         <View style={globalStyles.card}>
           <Text style={globalStyles.titleText}>Welcome back!</Text>
           <View style={styles.loginForm}>
+            <Text style={{ color: colors.colorRed }}>{errorMessage == "" ? errorMessage : ""}</Text>
+            <Text style={{ color: colors.colorGreen }}>{successMessage == "" ? successMessage : ""}</Text>
+
             <TextInput style={globalStyles.inputField} placeholder="Email" onChangeText={setEmail} />
             <TextInput style={globalStyles.inputField} placeholder="Password" secureTextEntry onChangeText={setPassword} />
+
             <Pressable
               onPress={handleLogin}
               style={({ pressed }) => [

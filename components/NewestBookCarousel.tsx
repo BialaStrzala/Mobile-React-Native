@@ -40,8 +40,8 @@ export default function BookCarousel() {
       contentContainerStyle={styles.scrollContent}
     >
       {books.map((book, index) => (
-        <Pressable 
-          key={index} 
+        <Pressable
+          key={index}
           style={styles.card}
           onPress={() => handleBookPress(book)}
         >
@@ -80,6 +80,7 @@ const styles = StyleSheet.create({
   bookPlaceholder: {
     backgroundColor: colors.primary,
     height: 100,
+    width: 70,
     borderRadius: radius.sm,
     justifyContent: "center",
     alignItems: "center",
