@@ -1,5 +1,6 @@
 import BooksGrid from '@/components/BooksGrid'
 import { pullUserBooks } from '@/lib/bookmanager'
+import { globalStyles } from '@/lib/globalStyle'
 import { colors } from '@/lib/theme'
 import { useFocusEffect, useRouter } from 'expo-router'
 import React, { useCallback, useState } from 'react'
@@ -15,7 +16,7 @@ interface BookData {
     id: number;
     title: string;
     author: string;
-  };
+  }[];
 }
 
 const MyBooks = () => {
@@ -36,21 +37,21 @@ const MyBooks = () => {
     }
   }, []);
 
-  // Reload data whenever the screen comes into focus
   useFocusEffect(
     useCallback(() => {
       loadBooks();
     }, [loadBooks])
   );
 
-
   const handleBookPress = (book: BookData) => {
+    const bookTitle = book.books[0]?.title || "";
+    const bookAuthor = book.books[0]?.author || "";
     router.push({
       pathname: "/(app)/(tabs)/editbook",
       params: {
-        bookId: book.id,
-        title: book.books.title,
-        author: book.books.author,
+        bookId: book.book_id,
+        title: bookTitle,
+        author: bookAuthor,
         status: book.status,
         rating: book.rating?.toString() || "",
         notes: book.notes || ""
@@ -60,23 +61,27 @@ const MyBooks = () => {
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color={colors.primary} />
+      <View style={globalStyles.mainContainer}>
+        <View style={globalStyles.loadingCenter}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Error: {error}</Text>
+      <View style={globalStyles.mainContainer}>
+        <View style={globalStyles.loadingCenter}>
+          <Text style={styles.errorText}>Error: {error}</Text>
+        </View>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>My Books</Text>
+    <View style={globalStyles.mainContainer}>
+      <Text style={globalStyles.titleText}>My Books</Text>
       {books.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>No books yet!</Text>
@@ -92,17 +97,6 @@ const MyBooks = () => {
 export default MyBooks
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.backgroundColor,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: colors.primary,
-    padding: 16,
-    paddingBottom: 8,
-  },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
@@ -112,12 +106,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#666",
+    color: colors.textLightMuted,
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 14,
-    color: "#999",
+    color: colors.textLightMuted,
     textAlign: "center",
   },
   errorText: {

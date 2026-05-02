@@ -1,8 +1,16 @@
-import { deleteBookFromUser, updateBookNotes, updateBookRating, updateBookStatus } from '@/lib/bookmanager';
+import { deleteBookFromUser, getBookById, updateBookNotes, updateBookRating, updateBookStatus } from '@/lib/bookmanager';
+import { globalStyles } from '@/lib/globalStyle';
 import { colors, radius } from '@/lib/theme';
+import { FontAwesome } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Alert, Button, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Button, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+
+interface BookData{
+  id: any,
+  title: string,
+  author: string,
+}
 
 const STATUS_OPTIONS = ['Planning', 'Reading', 'Finished', 'Discontinued'];
 
@@ -10,13 +18,42 @@ const EditBook = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  const [status, setStatus] = useState(params.status as string || 'Planning');
-  const [rating, setRating] = useState(parseInt(params.rating as string) || 0);
-  const [notes, setNotes] = useState(params.notes as string || '');
+  const [status, setStatus] = useState('Planning');
+  const [rating, setRating] = useState(0);
+  const [notes, setNotes] = useState('');
+  const [bookData, setBookData] = useState<BookData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const bookId = params.bookId as string;
   const title = params.title as string;
   const author = params.author as string;
+
+  useEffect(() => {
+    const loadBookData = async () => {
+      try {
+        setLoading(true);
+        const data = await getBookById(bookId);
+        setBookData(data);
+      }
+      catch (err: any) {
+        setError(err.message);
+        console.error("Error loading book data:", err);
+      }
+      finally{
+        setLoading(false);
+      }
+    };
+    loadBookData();
+    
+  }, [bookId]);
+
+  // Update state when params change
+  useEffect(() => {
+    setStatus(params.status as string || 'Planning');
+    setRating(parseInt(params.rating as string) || 0);
+    setNotes(params.notes as string || '');
+  }, [params.status, params.rating, params.notes]);
 
   const handleSave = async () => {
     try {
@@ -24,7 +61,7 @@ const EditBook = () => {
       await updateBookRating(bookId, rating);
       await updateBookNotes(bookId, notes);
       Alert.alert('Success', 'Book updated successfully', [
-        { text: 'OK', onPress: () => router.back() }
+        { text: 'OK', onPress: () => router.push("/(app)/(tabs)/mybooks") }
       ]);
     } catch (err: any) {
       Alert.alert('Error', err.message);
@@ -43,7 +80,7 @@ const EditBook = () => {
           onPress: async () => {
             try {
               await deleteBookFromUser(bookId);
-              router.back();
+              router.push("/(app)/(tabs)/mybooks");
             } catch (err: any) {
               Alert.alert('Error', err.message);
             }
@@ -53,11 +90,31 @@ const EditBook = () => {
     );
   };
 
+  if (loading) {
+      return (
+        <View style={globalStyles.mainContainer}>
+          <View style={globalStyles.loadingCenter}>
+            <ActivityIndicator size="large" color={colors.primary} />
+          </View>
+        </View>
+      );
+    }
+  
+    if (error) {
+      return (
+        <View style={globalStyles.mainContainer}>
+          <View style={globalStyles.loadingCenter}>
+            <Text style={styles.errorText}>Error: {error}</Text>
+          </View>
+        </View>
+      );
+    }
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.author}>{author}</Text>
+        <Text style={styles.title}>{bookData?.title || "Unknown Title"}</Text>
+        <Text style={styles.author}>{bookData?.author || "Unknown Author"}</Text>
       </View>
 
       <View style={styles.section}>
@@ -90,14 +147,13 @@ const EditBook = () => {
         <View style={styles.ratingContainer}>
           {[1, 2, 3, 4, 5].map((star) => (
             <Pressable key={star} onPress={() => setRating(star)}>
-              <Text
-                style={[
-                  styles.star,
-                  { color: star <= rating ? colors.colorOrange : colors.colorLightGray },
-                ]}
-              >
-                ★
-              </Text>
+              <FontAwesome
+                key={star}
+                name="star"
+                size={24}
+                color={star <= rating ? colors.colorOrange : colors.colorLightGray}
+                style={{ marginRight: 6 }}
+              />
             </Pressable>
           ))}
           {rating > 0 && (
@@ -123,7 +179,7 @@ const EditBook = () => {
 
       <View style={styles.buttonContainer}>
         <Button title="Save Changes" onPress={handleSave} color={colors.colorGreen} />
-        <Button title="Delete Book" onPress={handleDelete} color={colors.colorRed} />
+        <Button title="Remove Book From Profile" onPress={handleDelete} color={colors.colorRed} />
       </View>
     </ScrollView>
   );
@@ -155,6 +211,11 @@ const styles = StyleSheet.create({
   author: {
     fontSize: 14,
     color: '#666',
+  },
+  errorText: {
+    color: colors.colorRed,
+    fontSize: 16,
+    textAlign: 'center',
   },
   section: {
     backgroundColor: colors.cardColor,
@@ -200,7 +261,7 @@ const styles = StyleSheet.create({
   },
   clearRating: {
     marginLeft: 16,
-    color: colors.primary,
+    color: colors.textLightMuted,
     fontSize: 14,
   },
   notesInput: {

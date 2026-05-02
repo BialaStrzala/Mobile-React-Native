@@ -1,13 +1,13 @@
 import { colors } from "@/lib/theme";
 import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { Tabs } from "expo-router";
+import { Tabs, router } from "expo-router";
 import { Pressable, StyleSheet } from "react-native";
 
 function DrawerButton() {
   const navigation = useNavigation();
   return (
-    <Pressable onPress={() => navigation.openDrawer()} style={styles.drawerButton}>
+    <Pressable onPress={() => (navigation as any).openDrawer()} style={styles.drawerButton}>
       <FontAwesome name="bars" size={20} color="#fff" />
     </Pressable>
   );
@@ -31,6 +31,13 @@ export default function TabsLayout() {
         options={{ 
           title: "Home",
           tabBarIcon: ({ color, size }) => <FontAwesome name="home" size={size} color={color} />,
+        }} 
+      />
+      <Tabs.Screen 
+        name="allbooks" 
+        options={{ 
+          title: "All Books",
+          tabBarIcon: ({ color, size }) => <FontAwesome name="book" size={size} color={color} />,
         }} 
       />
       <Tabs.Screen 
@@ -60,6 +67,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   drawerButton: {
-    marginLeft: 10,
+    marginLeft: 15,
+    marginRight: 10,
   },
 })

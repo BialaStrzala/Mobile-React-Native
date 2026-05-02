@@ -9,7 +9,6 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
   const handleLogin = async () => {
     const { error } = await supabase.auth.signInWithPassword({
@@ -21,7 +20,6 @@ export default function Login() {
       setErrorMessage(error.message);
       return;
     }
-    setSuccessMessage("Logging in...");
     setErrorMessage("");
     router.push("/(app)");
   };
@@ -29,13 +27,17 @@ export default function Login() {
   return (
     <View style={globalStyles.mainContainer}>
       <View style={globalStyles.header}><Text style={globalStyles.headerText}>Login</Text></View>
-
+      <Text style={globalStyles.titleText}>Welcome back!</Text>
       <View style={styles.centerWrapper}>
         <View style={globalStyles.card}>
-          <Text style={globalStyles.titleText}>Welcome back!</Text>
+          
           <View style={styles.loginForm}>
-            <Text style={{ color: colors.colorRed }}>{errorMessage == "" ? errorMessage : ""}</Text>
-            <Text style={{ color: colors.colorGreen }}>{successMessage == "" ? successMessage : ""}</Text>
+            {errorMessage && (
+              <View style={styles.messagesContainer}>
+                {errorMessage && (
+                  <Text style={{ color: colors.colorRed }}>{errorMessage}</Text>)}
+              </View>
+            )}
 
             <TextInput style={globalStyles.inputField} placeholder="Email" onChangeText={setEmail} />
             <TextInput style={globalStyles.inputField} placeholder="Password" secureTextEntry onChangeText={setPassword} />
@@ -68,13 +70,16 @@ export default function Login() {
 
 const styles = StyleSheet.create({
   centerWrapper: {
-    flex: 1,
-    marginTop: 50,
     alignItems: "center",
   },
   loginForm: {
     justifyContent: "center",
-    padding: 15,
-    gap: 15,
+    padding: 16,
+    gap: 16,
   },
+  messagesContainer:{
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  }
 })

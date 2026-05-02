@@ -3,8 +3,8 @@ import { colors } from "./theme";
 
 // Set colors
 const bookColors = [
-    colors.colorBlue, colors.colorTeal, colors.colorGreen, colors.colorPurple, colors.colorPink, colors.colorRed, colors.colorOrange, colors.colorYellow, colors.colorGray
-];
+    colors.colorBlue, colors.colorTeal, colors.colorGreen, colors.colorPurple, colors.colorPink, colors.colorRed, colors.colorOrange, colors.colorYellow, colors.colorGray, 
+colors.colorDarkBlue];
 
 export const addNewBook = async (title: string, author: string) => {
     //Duplicates
@@ -15,6 +15,11 @@ export const addNewBook = async (title: string, author: string) => {
         .maybeSingle();
 
     let bookId: number;
+
+    //Title or author empty
+    if (!title.trim() || !author.trim()) {
+        throw new Error("Title and author cannot be empty");
+    }
 
     if (existingBooks) {
         //Book already exists
@@ -151,37 +156,31 @@ export const pullAllBooks = async () => {
     return data || [];
 };
 
-export const pull3NewBooks = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        throw new Error("User not authenticated");
+export const pullAllBooksByFilter = async (filter: string) => {
+    let data;
+    let error = null;
+    
+    switch (filter) {
+        case "Newest":
+            ({ data, error } = await supabase.from("books_with_avg_rating").select("*").order("id", { ascending: false }));
+            break;
+        case "Author":
+            ({ data, error } = await supabase.from("books_with_avg_rating").select("*").order("author"));
+            break;
+        case "Title":
+        default:
+            ({ data, error } = await supabase.from("books_with_avg_rating").select("*").order("title"));
+            break;
     }
-
-    const { data, error } = await supabase
-        .from("user_books")
-        .select(`
-            id,
-            status,
-            rating,
-            book_id,
-            books (
-                id,
-                title,
-                author
-            )
-        `)
-        .order("created_at", { ascending: false })
-        .limit(3);
-
+    
     if (error) {
         throw new Error(error.message);
     }
-
+    
     return data || [];
 };
 
-export const getBookById = async (bookId: number) => {
+export const getBookById = async (bookId: any) => {
     const { data, error } = await supabase.from("books").select(`id, title, author, created_at`).eq("id", bookId).single();
 
     if (error) {
@@ -189,7 +188,7 @@ export const getBookById = async (bookId: number) => {
     }
 
     return data;
-}
+};
 
 export const updateBookStatus = async (userBookId: string, status: string) => {
     const { error } = await supabase

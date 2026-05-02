@@ -1,9 +1,9 @@
 import { globalStyles } from "@/lib/globalStyle";
 import { supabase } from "@/lib/supabase";
+import { colors } from "@/lib/theme";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { colors } from "@/lib/theme";
 
 export default function Register() {
   const router = useRouter();
@@ -11,7 +11,6 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
   const handleRegister = async () => {
     const { data, error } = await supabase.auth.signUp({
@@ -35,8 +34,7 @@ export default function Register() {
         email: user.email,
       });
     }
-    setSuccessMessage("Registering...");
-    setErrorMessage("";)
+    setErrorMessage("");
     router.push("/(app)/(tabs)");
   };
 
@@ -44,12 +42,16 @@ export default function Register() {
     <View style={globalStyles.mainContainer}>
       <View style={globalStyles.header}><Text style={globalStyles.headerText}>Register</Text></View>
 
+      <Text style={globalStyles.titleText}>Sign Up Now!</Text>
       <View style={styles.centerWrapper}>
         <View style={globalStyles.card}>
-          <Text style={globalStyles.titleText}>Welcome!</Text>
           <View style={styles.loginForm}>
-            <Text style={{ color: colors.colorRed }}>{errorMessage == "" ? errorMessage : ""}</Text>
-            <Text style={{ color: colors.colorGreen }}>{successMessage == "" ? successMessage : ""}</Text>
+            {errorMessage && (
+              <View style={styles.messagesContainer}>
+                {errorMessage && (
+                  <Text style={{ color: colors.colorRed }}>{errorMessage}</Text>)}
+              </View>
+            )}
 
             <TextInput style={globalStyles.inputField} placeholder="Username" onChangeText={setUsername} />
             <TextInput style={globalStyles.inputField} placeholder="Email" onChangeText={setEmail} />
@@ -71,7 +73,7 @@ export default function Register() {
               ]}
             >
               <Text style={globalStyles.secondaryButtonText}>
-                Have an account? Log in
+                Already have an account? Log in
               </Text>
             </Pressable>
           </View>
@@ -83,13 +85,16 @@ export default function Register() {
 
 const styles = StyleSheet.create({
   centerWrapper: {
-    flex: 1,
-    marginTop: 50,
     alignItems: "center",
   },
   loginForm: {
     justifyContent: "center",
-    padding: 15,
-    gap: 15,
+    padding: 16,
+    gap: 16,
   },
+  messagesContainer:{
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  }
 })

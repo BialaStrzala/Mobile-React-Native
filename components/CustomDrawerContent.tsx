@@ -52,25 +52,25 @@ export default function CustomDrawerContent(props: any) {
 
       <DrawerItem
         label="Home"
-        onPress={() => router.push("/(tabs)/")}
+        onPress={() => router.push("/(app)")}
         labelStyle={styles.label}
         icon={({ color, size }) => <FontAwesome name="home" size={size} color={color} />}
       />
       <DrawerItem
         label="My Books"
-        onPress={() => router.push("/(tabs)/mybooks")}
+        onPress={() => router.push("/(app)/(tabs)/mybooks")}
         labelStyle={styles.label}
         icon={({ color, size }) => <FontAwesome name="book" size={size} color={color} />}
       />
       <DrawerItem
         label="Profile"
-        onPress={() => router.push("/(tabs)/profile")}
+        onPress={() => router.push("/(app)/(tabs)/profile")}
         labelStyle={styles.label}
         icon={({ color, size }) => <FontAwesome name="user" size={size} color={color} />}
       />
       <DrawerItem
         label="Settings"
-        onPress={() => router.push("/(tabs)/settings")}
+        onPress={() => router.push("/(app)/(tabs)/settings")}
         labelStyle={styles.label}
         icon={({ color, size }) => <FontAwesome name="cog" size={size} color={color} />}
       />

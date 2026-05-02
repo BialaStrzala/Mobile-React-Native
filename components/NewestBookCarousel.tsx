@@ -1,109 +1,220 @@
+import { bookNameToColor, getBookDetails } from "@/lib/bookmanager";
 import { supabase } from "@/lib/supabase";
 import { colors, radius } from "@/lib/theme";
 import { FontAwesome } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const { width } = Dimensions.get("window");
+const CARD_WIDTH = width * 0.65;
 
-export default function BookCarousel() {
-  const router = useRouter();
-  const [books, setBooks] = useState<any[]>([]);
+interface BookInfo {
+    id: number;
+    title: string;
+    author: string;
+    created_at?: string;
+}
 
-  useEffect(() => {
-    const fetchBooks = async () => {
-      const { data } = await supabase
-        .from("books")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(3);
+interface NewestBookCarouselProps {
+    books?: BookInfo[];
+}
 
-      setBooks(data || []);
+export default function NewestBookCarousel({ books }: NewestBookCarouselProps) {
+    const router = useRouter();
+    const [bookDetails, setBookDetails] = useState<any[]>([]);
+    const [carouselBooks, setCarouselBooks] = useState<BookInfo[]>(books || []);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        setLoading(true);
+        if (!books || books.length === 0) {
+            fetchNewestBooks();
+        } else {
+            setCarouselBooks(books);
+        }
+        setLoading(false);
+    }, [books]);
+
+    const fetchNewestBooks = async () => {
+        const { data } = await supabase
+            .from("books")
+            .select("id, title, author, created_at")
+            .order("id", { ascending: false })
+            .limit(5);
+
+        if (data) {
+            setCarouselBooks(data);
+            // Fetch average ratings for each book
+            const detailsPromises = data.map(async (book) => {
+                try {
+                    return await getBookDetails(book.id);
+                } catch {
+                    return { ...book, averageRating: 0, totalRatings: 0 };
+                }
+            });
+            const details = await Promise.all(detailsPromises);
+            setBookDetails(details);
+        }
     };
 
-    fetchBooks();
-  }, []);
+    const getBookDetail = (bookId: number) => {
+        return bookDetails.find(b => b.id === bookId);
+    };
 
-  const handleBookPress = (book: any) => {
-    router.push({
-      pathname: "/(app)/(tabs)/bookdetails",
-      params: { bookId: book.id.toString() },
-    });
-  };
+    const handleBookPress = (book: BookInfo) => {
+        router.push({
+            pathname: "/(app)/(tabs)/bookdetails",
+            params: { bookId: book.id.toString() },
+        });
+    };
 
-  return (
-    <ScrollView
-      horizontal
-      pagingEnabled
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.scrollContent}
-    >
-      {books.map((book, index) => (
-        <Pressable
-          key={index}
-          style={styles.card}
-          onPress={() => handleBookPress(book)}
-        >
-          <View style={styles.bookPlaceholder}>
-            <Text style={styles.placeholderText}>
-              {book.title.charAt(0).toUpperCase()}
-            </Text>
+    const getInitial = (title: string) => {
+        return title ? title.charAt(0).toUpperCase() : "?";
+    };
+
+    if (loading) {
+        return (
+          <View style={styles.container}>
+            <ActivityIndicator size="large" color={colors.primary} />
           </View>
-          <Text style={styles.title} numberOfLines={2}>{book.title}</Text>
-          <Text style={styles.author} numberOfLines={1}>{book.author}</Text>
-          <View style={styles.arrowContainer}>
-            <FontAwesome name="chevron-right" size={14} color={colors.primary} />
-          </View>
-        </Pressable>
-      ))}
-    </ScrollView>
-  );
+        );
+      }
+
+    return (
+        <View style={styles.container}>
+            <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+            >
+                {carouselBooks.map((book, index) => {
+                    const detail = getBookDetail(book.id);
+                    const bookColor = bookNameToColor(book.title);
+                    const avgRating = detail?.averageRating || 0;
+                    const totalRatings = detail?.totalRatings || 0;
+
+                    return (
+                        <Pressable
+                            key={index}
+                            style={styles.card}
+                            onPress={() => handleBookPress(book)}
+                        >
+                            <View style={styles.cardContent}>
+                                <View style={[styles.bookCover, { backgroundColor: bookColor }]}>
+                                    <Text style={styles.bookInitial}>
+                                        {getInitial(book.title)}
+                                    </Text>
+                                </View>
+                                <View style={styles.bookInfo}>
+                                    <Text style={styles.bookTitle} numberOfLines={2}>
+                                        {book.title}
+                                    </Text>
+                                    <Text style={styles.bookAuthor} numberOfLines={1}>
+                                        {book.author}
+                                    </Text>
+                                    <View style={styles.ratingContainer}>
+                                        <View style={styles.starsRow}>
+                                            {[1, 2, 3, 4, 5].map((star) => (
+                                                <FontAwesome
+                                                    key={star}
+                                                    name="star"
+                                                    size={10}
+                                                    color={star <= Math.round(avgRating) ? colors.colorOrange : colors.colorLightGray}
+                                                />
+                                            ))}
+                                        </View>
+                                        <Text style={styles.ratingText}>
+                                            {avgRating > 0 ? `${avgRating}/5` : "N/A"}
+                                        </Text>
+                                    </View>
+                                    {totalRatings > 0 && (
+                                        <Text style={styles.totalRatings}>({totalRatings} ratings)</Text>
+                                    )}
+                                </View>
+                            </View>
+                        </Pressable>
+                    );
+                })}
+            </ScrollView>
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
-  scrollContent: {
-    paddingHorizontal: width * 0.05,
-  },
-  card: {
-    width: width * 0.65,
-    marginHorizontal: width * 0.05,
-    backgroundColor: colors.cardColor,
-    borderRadius: 15,
-    padding: 20,
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  bookPlaceholder: {
-    backgroundColor: colors.primary,
-    height: 100,
-    width: 70,
-    borderRadius: radius.sm,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  placeholderText: {
-    color: "#fff",
-    fontSize: 36,
-    fontWeight: "bold",
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 4,
-  },
-  author: {
-    color: "#666",
-    fontSize: 13,
-  },
-  arrowContainer: {
-    position: "absolute",
-    right: 15,
-    bottom: 15,
-  },
+    container: {
+        marginBottom: 16,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: colors.textMuted,
+        marginBottom: 12,
+        paddingHorizontal: 16,
+    },
+    scrollContent: {
+        paddingHorizontal: 0,
+    },
+    card: {
+        width: CARD_WIDTH,
+        backgroundColor: colors.cardColor,
+        borderRadius: radius.lg,
+        padding: 12,
+        marginRight: 12,
+        elevation: 2,
+        shadowColor: colors.shadow,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        marginVertical: 8,
+    },
+    cardContent: {
+        flexDirection: "row",
+    },
+    bookCover: {
+        width: 60,
+        height: 80,
+        borderRadius: radius.sm,
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 12,
+    },
+    bookInitial: {
+        color: colors.cardColor,
+        fontSize: 24,
+        fontWeight: "bold",
+    },
+    bookInfo: {
+        flex: 1,
+        justifyContent: "center",
+    },
+    bookTitle: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: colors.textMuted,
+        marginBottom: 2,
+    },
+    bookAuthor: {
+        fontSize: 12,
+        color: colors.textLightMuted,
+        marginBottom: 4,
+    },
+    ratingContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 4,
+    },
+    starsRow: {
+        flexDirection: "row",
+    },
+    ratingText: {
+        fontSize: 11,
+        color: colors.textLightMuted,
+        marginLeft: 4,
+    },
+    totalRatings: {
+        fontSize: 10,
+        color: colors.textLightMuted,
+        marginTop: 2,
+    },
 });

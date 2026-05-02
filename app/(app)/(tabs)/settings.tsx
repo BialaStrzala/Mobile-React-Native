@@ -1,83 +1,161 @@
 import { globalStyles } from "@/lib/globalStyle";
 import { supabase } from "@/lib/supabase";
+import { colors } from "@/lib/theme";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ScrollView } from "react-native-gesture-handler";
+
+interface UserAuthData {
+    id: any,
+    username: any,
+    email: any,
+    created_at?: any
+}
 
 const Settings = () => {
   const router = useRouter();
-  const [userId, setUserId] = useState<number>(0);
-  const [email, setEmail] = useState<string>('null');
-  const [password, setPassword] = useState<string>('');
+  const [userData, setUserData] = useState<UserAuthData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const [newPassword, setNewPassword] = useState<string>('');
   const [passwordRetype, setPasswordRetype] = useState<string>('');
-  const [username, setUsername] = useState<string>('');
+  const [newUsername, setNewUsername] = useState<string>('');
+  const [newEmail, setNewEmail] = useState<string>('');
 
   const changeUsername = async () => {
-    const { data, error } = await supabase.from("users").update({
-      username: username,
-    }).eq("id", userId);
-    router.push("/(app)/(tabs)/profile"); //?
+    try{
+      const { data, error } = await supabase.from("users").update({username: newUsername,}).eq("id", userData?.id);
+      Alert.alert('Success', 'Username updated successfully', [
+        { text: 'OK', onPress: () => router.push('/(app)/(tabs)/settings') }
+      ]);
+    }
+    catch(err: any){
+      Alert.alert('Error', err.message);
+    }
   };
 
   //In order to use the updateUser() method, the user needs to be signed in first.
   const changePassword = async () => {
-    if (!(password == passwordRetype)) {
+    if (!(newPassword == passwordRetype)) {
+      Alert.alert('Error', 'Passwords do not match');
       return;
     }
-    const { error } = await supabase.auth.updateUser({ password: password })
-  }
+    try{
+      const { error } = await supabase.auth.updateUser({ password: newPassword })
+      Alert.alert('Success', 'Password updated successfully', [
+        { text: 'OK', onPress: () => router.push('/(app)/(tabs)/settings') }
+      ]);
+    }
+    catch(err: any){
+      Alert.alert('Error', err.message);
+    } 
+  };
 
   const changeEmail = async () => {
-    const { error } = await supabase.auth.updateUser({ email: email })
-  }
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!newEmail || !emailRegex.test(newEmail)) {
+      Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
+
+    // is new
+    if (newEmail === userData?.email) {
+      Alert.alert('Error', 'New email must be different from current email');
+      return;
+    }
+
+    try{
+      const { data, error } = await supabase.auth.updateUser({ email: newEmail });
+      if (error) {
+        console.log("Auth error details:", error);
+        Alert.alert("Error", `Failed to update email: ${error.message}`);
+        return;
+      }
+
+      // Update the users table
+      const { error: dbError } = await supabase
+        .from("users")
+        .update({email: newEmail})
+        .eq("id", userData?.id);
+
+      if (dbError) {
+        console.log("Database error:", dbError);
+        Alert.alert("Warning", "Email updated in auth but failed to update in database.");
+        return;
+      }
+
+      Alert.alert('Success', 'Email updated successfully. Please check your new email for confirmation.', [
+        { text: 'OK', onPress: () => {
+          setNewEmail('');
+          router.push('/(app)/(tabs)/settings');
+        }}
+      ]);
+    } catch(err: any){
+      console.log("Unexpected error:", err);
+      Alert.alert('Error', `An unexpected error occurred: ${err.message}`);
+    }
+  };
 
   useEffect(() => {
-    const loadUserData = async () => {
-      const { data: { user }, } = await supabase.auth.getUser();
-
-      if (!user) return;
-
-      const { data } = await supabase
-        .from("users")
-        .select("id, username, email")
-        .eq("id", user.id)
-        .single();
-
-      setUsername(data?.username ?? "User");
-      setUserId(data?.id ?? 0);
-    };
-    loadUserData();
+    const loadProfileData = async () => {
+      try {
+        setLoading(true);
+        //user data
+        const { data: { user }, } = await supabase.auth.getUser();
+        if (!user) return;
+        const { data: userProfile } = await supabase
+            .from("users")
+            .select("id, username, email, created_at")
+            .eq("uid", user.id)
+            .single();
+        setUserData(userProfile);
+      } catch (err) {
+          console.error("Error loading profile:", err);
+      } finally {
+          setLoading(false);
+      }
+  };
+  loadProfileData();
   }, []);
 
   return (
     <ScrollView style={globalStyles.mainContainer} contentContainerStyle={globalStyles.scrollViewContent}>
+      <Text style={globalStyles.titleText}>Settings</Text>
       <View style={globalStyles.card}>
-        <Text style={globalStyles.titleText}>Settings</Text>
         <View>
-          <Text style={globalStyles.titleText}>Edit profile</Text>
           <View>
-            <TextInput placeholder="Username" value={username} onChangeText={setUsername} style={globalStyles.inputField} />
-            <Pressable onPress={changeUsername}
-              style={({ pressed }) => [
-                globalStyles.mainButton, pressed && globalStyles.mainButtonPressed,]}>
-              <Text style={globalStyles.mainButtonText}>Change username</Text>
-            </Pressable>
+            <Text style={styles.cardTitle}>Username</Text>
+            <View style={styles.group}>
+              <TextInput placeholder={userData?.username || "Username"} value={newUsername} onChangeText={setNewUsername} style={globalStyles.inputField} placeholderTextColor={colors.textLightMuted}/>
+              <Pressable onPress={changeUsername}
+                style={({ pressed }) => [
+                  globalStyles.tertiaryButton, pressed && globalStyles.tertiaryButtonPressed,]}>
+                <Text style={globalStyles.mainButtonText}>Change username</Text>
+              </Pressable>
+            </View>
 
-            <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={globalStyles.inputField} />
-            <Pressable onPress={changeEmail}
-              style={({ pressed }) => [
-                globalStyles.mainButton, pressed && globalStyles.mainButtonPressed,]}>
-              <Text style={globalStyles.mainButtonText}>Change email</Text>
-            </Pressable>
+            <Text style={styles.cardTitle}>Email</Text>
+            <View style={styles.group}>
+              <TextInput placeholder={userData?.email || "Email"} value={newEmail} onChangeText={setNewEmail} style={globalStyles.inputField} placeholderTextColor={colors.textLightMuted} />
+              <Pressable onPress={changeEmail}
+                style={({ pressed }) => [
+                  globalStyles.tertiaryButton, pressed && globalStyles.tertiaryButtonPressed,]}>
+                <Text style={globalStyles.mainButtonText}>Change email</Text>
+              </Pressable>
+            </View>
 
-            <TextInput placeholder="Password" secureTextEntry onChangeText={setPassword} style={globalStyles.inputField} />
-            <TextInput placeholder="Confirm password" secureTextEntry onChangeText={setPasswordRetype} style={globalStyles.inputField} />
-            <Pressable onPress={changePassword}
-              style={({ pressed }) => [
-                globalStyles.mainButton, pressed && globalStyles.mainButtonPressed,]}>
-              <Text style={globalStyles.mainButtonText}>Change password</Text>
-            </Pressable>
+            <Text style={styles.cardTitle}>Password</Text>
+            <View style={styles.group}>
+              <TextInput placeholder="New Password" secureTextEntry onChangeText={setNewPassword} style={globalStyles.inputField} placeholderTextColor={colors.textLightMuted} />
+              <TextInput placeholder="Confirm new password" secureTextEntry onChangeText={setPasswordRetype} style={globalStyles.inputField} placeholderTextColor={colors.textLightMuted} />
+              <Pressable onPress={changePassword}
+                style={({ pressed }) => [
+                  globalStyles.tertiaryButton, pressed && globalStyles.tertiaryButtonPressed,]}>
+                <Text style={globalStyles.mainButtonText}>Change password</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       </View>
@@ -87,4 +165,15 @@ const Settings = () => {
 
 export default Settings
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.textMuted,
+    marginBottom: 12,
+  },
+  group: {
+    gap: 12,
+    marginBottom: 16,
+  }
+})

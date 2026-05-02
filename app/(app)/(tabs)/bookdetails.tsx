@@ -1,10 +1,11 @@
 import { addUserBook, bookNameToColor, checkUserHasBook, getBookDetails } from "@/lib/bookmanager";
+import { globalStyles } from "@/lib/globalStyle";
 import { supabase } from "@/lib/supabase";
 import { colors, radius } from "@/lib/theme";
 import { FontAwesome } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Button, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 interface BookDetails {
   id: number;
@@ -46,6 +47,8 @@ const BookDetails = () => {
 
       const userBookData = await checkUserHasBook(bookId);
       setUserBook(userBookData);
+      console.log("User book:", userBook);
+      console.log("User book data:", userBookData);
     } catch (err) {
       console.error("Error loading book details:", err);
     } finally {
@@ -143,9 +146,9 @@ const BookDetails = () => {
               />
             ))}
             <Text style={styles.ratingText}>
-              {bookDetails.averageRating / 5}
+              {bookDetails.averageRating}
             </Text>
-            <Text>
+            <Text style={globalStyles.ratingText}>
               {bookDetails.totalRatings > 0 && bookDetails.averageRating > 0 ? `${bookDetails.totalRatings} ratings` : "No ratings yet"}
             </Text>
           </View>
@@ -158,19 +161,19 @@ const BookDetails = () => {
 
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <FontAwesome name="book" size={20} color={colors.primary} />
+            <FontAwesome name="book" size={20} color={colors.colorOrange} />
             <Text style={styles.statNumber}>{bookDetails.planningCount}</Text>
             <Text style={styles.statLabel}>Planning</Text>
           </View>
 
           <View style={styles.statItem}>
-            <FontAwesome name="hourglass-half" size={20} color={colors.primary} />
+            <FontAwesome name="hourglass-half" size={20} color={colors.colorBlue} />
             <Text style={styles.statNumber}>{bookDetails.readingCount}</Text>
             <Text style={styles.statLabel}>Reading</Text>
           </View>
 
           <View style={styles.statItem}>
-            <FontAwesome name="check-circle" size={20} color={colors.primary} />
+            <FontAwesome name="check-circle" size={20} color={colors.colorGreen} />
             <Text style={styles.statNumber}>{bookDetails.finishedCount}</Text>
             <Text style={styles.statLabel}>Finished</Text>
           </View>
@@ -179,11 +182,11 @@ const BookDetails = () => {
 
       {/* Add to List Button */}
       <View style={styles.buttonContainer}>
-        <Button
-          title={userBook ? "Edit My Book" : "Add to My List"}
-          onPress={handleAddToList}
-          color={colors.primary}
-        />
+        <Pressable onPress={handleAddToList}
+          style={({ pressed }) => [
+            globalStyles.tertiaryButton, pressed && globalStyles.tertiaryButtonPressed,]}>
+          <Text style={globalStyles.mainButtonText}>{userBook ? "Edit My Book" : "Add to My List"}</Text>
+        </Pressable>
       </View>
 
       {/* User's Book Info (if already added) */}

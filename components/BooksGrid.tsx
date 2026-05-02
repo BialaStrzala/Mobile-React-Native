@@ -4,7 +4,8 @@ import { FontAwesome } from "@expo/vector-icons";
 import React from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 
-interface BookData {
+// For user books (nested structure - books is an array from Supabase)
+interface UserBookData {
   id: string;
   book_id: number;
   status: string;
@@ -14,8 +15,19 @@ interface BookData {
     id: number;
     title: string;
     author: string;
-  };
+  }[];
 }
+
+// For all books (flat structure)
+interface FlatBookData {
+  id: number;
+  title: string;
+  author: string;
+  rating: number | null;
+}
+
+// Type to handle both structures
+type BookData = UserBookData | FlatBookData;
 
 interface BookCardProps {
   book: BookData;
@@ -23,8 +35,30 @@ interface BookCardProps {
 }
 
 const BookCard: React.FC<BookCardProps> = ({ book, onPress }) => {
-  const bookColor = bookNameToColor(book.books.title);
-  const starRating = book.rating || 0;
+  // Handle both nested (array) and flat structures
+  let title: string;
+  let author: string;
+  let rating: number;
+  
+  if ('books' in book && Array.isArray(book.books) && book.books.length > 0) {
+    // User book with nested array
+    title = book.books[0].title;
+    author = book.books[0].author;
+    rating = (book as UserBookData).rating || 0;
+  } else if ('books' in book && book.books && typeof book.books === 'object') {
+    // User book with object (legacy)
+    title = (book.books as any).title;
+    author = (book.books as any).author;
+    rating = (book as UserBookData).rating || 0;
+  } else {
+    // Flat book allbooks.tsx
+    title = (book as FlatBookData).title;
+    author = (book as FlatBookData).author;
+    rating = (book as FlatBookData).rating || 0;
+  }
+  
+  const bookColor = bookNameToColor(title);
+  const starRating = rating;
 
   return (
     <Pressable style={styles.card} onPress={onPress}>
@@ -33,7 +67,7 @@ const BookCard: React.FC<BookCardProps> = ({ book, onPress }) => {
         <View style={styles.bookRow}>
           <View style={[styles.bookImagePlaceholder, { backgroundColor: bookColor }]}>
             <Text style={styles.bookPlaceholderText}>
-              {book.books.title.charAt(0).toUpperCase()}
+              {title.charAt(0).toUpperCase()}
             </Text>
           </View>
           <View style={styles.starsContainer}>
@@ -51,10 +85,10 @@ const BookCard: React.FC<BookCardProps> = ({ book, onPress }) => {
         {/* Book title and author below */}
         <View style={styles.bookInfo}>
           <Text style={styles.bookTitle} numberOfLines={2}>
-            {book.books.title}
+            {title}
           </Text>
           <Text style={styles.bookAuthor} numberOfLines={1}>
-            {book.books.author}
+            {author}
           </Text>
         </View>
       </View>
@@ -64,7 +98,7 @@ const BookCard: React.FC<BookCardProps> = ({ book, onPress }) => {
 
 interface BooksGridProps {
   books: BookData[];
-  onBookPress: (book: BookData) => void;
+  onBookPress: (book: any) => void;
   numColumns?: number;
 }
 
@@ -91,7 +125,7 @@ const BooksGrid: React.FC<BooksGridProps> = ({
       {/* Fill empty slots if last row has less than 3 items */}
       {row.length < numColumns &&
         Array.from({ length: numColumns - row.length }).map((_, i) => (
-          <View key={`empty-${i}`} style={styles.card} />
+          <View key={`empty-${i}`} style={styles.hiddenCard} />
         ))}
     </View>
   );
@@ -127,6 +161,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
+  },
+  hiddenCard:{
+    flex: 1,
+    backgroundColor: "transparent",
+    marginHorizontal: 4,
+    minHeight: 140,
   },
   cardContent: {
     padding: 8,

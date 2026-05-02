@@ -1,10 +1,12 @@
+import StatisticsBox from "@/components/StatisticsBox";
 import { bookNameToColor } from "@/lib/bookmanager";
+import { globalStyles } from "@/lib/globalStyle";
 import { supabase } from "@/lib/supabase";
 import { colors, radius } from "@/lib/theme";
 import { FontAwesome } from "@expo/vector-icons";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 interface UserAuthData {
     id: any,
@@ -22,13 +24,21 @@ interface UserBookData {
     books?: {
         title: any,
         author: any
-    }
+    }[]
+}
+
+interface BookData{
+    id: any,
+    title: string,
+    author: string,
 }
 
 const ProfileScreen = () => {
     const [userData, setUserData] = useState<UserAuthData | null>(null);
     const [userBookData, setUserBookData] = useState<UserBookData[]>([]);
+    const [latestBookData, setLatestBookData] = useState<BookData | null>(null);
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
 
     const loadData = useCallback(async () => {
         try {
@@ -51,7 +61,15 @@ const ProfileScreen = () => {
                 .eq("user_uid", user.id)
                 .order("created_at", { ascending: false });
 
+            //latest book title+author
+            const { data: latestBook } = await supabase
+                .from("books")
+                .select("id, title, author")
+                .eq("id", userBookData[0]?.book_id)
+                .single();
+
             setUserBookData(books || []);
+            setLatestBookData(latestBook || null);
         } catch (err) {
             console.error("Error loading profile:", err);
         } finally {
@@ -59,7 +77,7 @@ const ProfileScreen = () => {
         }
     }, []);
 
-    // Reload data whenever the screen comes into focus
+    // Reload data
     useFocusEffect(
         useCallback(() => {
             loadData();
@@ -100,9 +118,10 @@ const ProfileScreen = () => {
     }
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <ScrollView style={globalStyles.mainContainer} contentContainerStyle={globalStyles.scrollViewContent}>
+            <Text style={globalStyles.titleText}>User Profile</Text>
             {/* Profile Card */}
-            <View style={styles.card}>
+            <View style={globalStyles.card}>
                 <View style={styles.profileRow}>
                     <View style={styles.avatar}>
                         <Text style={styles.avatarText}>{getInitial()}</Text>
@@ -115,34 +134,37 @@ const ProfileScreen = () => {
             </View>
 
             {/* Latest Book Card */}
-            <View style={styles.card}>
+            <View style={globalStyles.card}>
                 <Text style={styles.cardTitle}>Latest Book</Text>
                 {latestBook ? (
+                    <Pressable onPress={() => {router.push({pathname: "/(app)/(tabs)/bookdetails",params: {bookId: latestBook.book_id.toString(),}});}}>
                     <View style={styles.latestBookRow}>
-                        <View style={[styles.bookImage, { backgroundColor: bookNameToColor(latestBook.books?.title || "") }]}>
+                        <View style={[styles.bookImage, { backgroundColor: bookNameToColor(latestBook.books?.[0]?.title || "") }]}>
                             <Text style={styles.bookInitial}>
-                                {latestBook.books?.title?.charAt(0).toUpperCase() || "?"}
+                                {latestBookData?.title?.charAt(0).toUpperCase() || "?"}
                             </Text>
                         </View>
                         <View style={styles.bookInfo}>
                             <Text style={styles.bookTitle} numberOfLines={2}>
-                                {latestBook.books?.title || "Unknown Title"}
+                                {latestBookData?.title || "Unknown Title"}
                             </Text>
                             <Text style={styles.bookAuthor} numberOfLines={1}>
-                                {latestBook.books?.author || "Unknown Author"}
+                                {latestBookData?.author || "Unknown Author"}
                             </Text>
                             <View style={styles.ratingRow}>
                                 {[1, 2, 3, 4, 5].map((star) => (
                                     <FontAwesome
                                         key={star}
                                         name="star"
-                                        size={12}
+                                        size={16}
+                                        style={{ marginRight: 4 }}
                                         color={star <= (latestBook.rating || 0) ? colors.colorOrange : colors.colorLightGray}
                                     />
                                 ))}
                             </View>
                         </View>
                     </View>
+                    </Pressable>
                 ) : (
                     <Text style={styles.emptyText}>No books added yet</Text>
                 )}
@@ -155,45 +177,14 @@ const ProfileScreen = () => {
             </View>
 
             {/* Statistics Card */}
-            <View style={styles.card}>
-                <Text style={styles.cardTitle}>Statistics</Text>
-
-                <View style={styles.statItem}>
-                    <Text style={styles.statLabel}>Total Books</Text>
-                    <Text style={styles.statValue}>{totalBooks}</Text>
-                </View>
-
-                <View style={styles.statsGrid}>
-                    <View style={styles.statBox}>
-                        <FontAwesome name="check-circle" size={20} color={colors.colorGreen} />
-                        <Text style={styles.statBoxValue}>{finishedCount}</Text>
-                        <Text style={styles.statBoxLabel}>Finished</Text>
-                    </View>
-                    <View style={styles.statBox}>
-                        <FontAwesome name="hourglass-half" size={20} color={colors.colorBlue} />
-                        <Text style={styles.statBoxValue}>{readingCount}</Text>
-                        <Text style={styles.statBoxLabel}>Reading</Text>
-                    </View>
-                    <View style={styles.statBox}>
-                        <FontAwesome name="book" size={20} color={colors.colorOrange} />
-                        <Text style={styles.statBoxValue}>{planningCount}</Text>
-                        <Text style={styles.statBoxLabel}>Planning</Text>
-                    </View>
-                    <View style={styles.statBox}>
-                        <FontAwesome name="times-circle" size={20} color={colors.colorRed} />
-                        <Text style={styles.statBoxValue}>{discontinuedCount}</Text>
-                        <Text style={styles.statBoxLabel}>Dropped</Text>
-                    </View>
-                </View>
-
-                <View style={styles.statItem}>
-                    <Text style={styles.statLabel}>Average Rating</Text>
-                    <View style={styles.avgRatingRow}>
-                        <FontAwesome name="star" size={18} color={colors.colorOrange} />
-                        <Text style={styles.avgRatingValue}>{averageRating}</Text>
-                    </View>
-                </View>
-            </View>
+            <StatisticsBox
+                totalBooks={totalBooks}
+                finishedCount={finishedCount}
+                readingCount={readingCount}
+                planningCount={planningCount}
+                discontinuedCount={discontinuedCount}
+                averageRating={averageRating}
+            />
         </ScrollView>
     )
 }
@@ -214,17 +205,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: colors.backgroundColor,
-    },
-    card: {
-        backgroundColor: colors.cardColor,
-        borderRadius: radius.lg,
-        padding: 16,
-        marginBottom: 16,
-        elevation: 2,
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
     },
     cardTitle: {
         fontSize: 16,

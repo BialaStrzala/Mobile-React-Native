@@ -8,9 +8,10 @@ export const colors = {
     cardColor: "#fff",
     shadow: "#000",
 
-    colorTeal: "#16a085",
-    colorGreen: "#2ecc71",
+    colorTeal: "#008c6b",
+    colorGreen: "#31b75e",
     colorBlue: "#3498db",
+    colorDarkBlue: "#1d50a2",
     colorPurple: "#9b59b6",
     colorPink: "#e972ae",
     colorRed: "#c0392b",
@@ -24,6 +25,7 @@ export const sizes = {
     headerText: 24,
     titleText: 22,
     marginMain: 25,
+    buttonPadding: 12,
 };
 
 export const radius = {
