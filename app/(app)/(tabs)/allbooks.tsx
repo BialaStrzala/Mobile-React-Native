@@ -15,9 +15,12 @@ interface BookData {
 
 const FILTER_OPTIONS = ['Title', 'Author', 'Newest'];
 
+const PAGE_SIZE = 60;
+
 const AllBooks = () => {
   const router = useRouter();
   const [books, setBooks] = useState<BookData[]>([]);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState('Title');
@@ -27,6 +30,7 @@ const AllBooks = () => {
       setLoading(true);
       const userBooks = await pullAllBooksByFilter(filter);
       setBooks(userBooks);
+      setVisibleCount(PAGE_SIZE);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -46,6 +50,10 @@ const AllBooks = () => {
 
   const handleApplyFilter = () => {
     loadBooks(selectedFilter);
+  };
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, books.length));
   };
 
   const handleBookPress = (book: any) => {
@@ -111,7 +119,7 @@ const AllBooks = () => {
         <Pressable onPress={() => router.push("/(app)/(tabs)/newbook")}
           style={({ pressed }) => [
             globalStyles.tertiaryButton, pressed && globalStyles.tertiaryButtonPressed,]}>
-          <Text style={globalStyles.mainButtonText}>Add a new book</Text>
+          <Text style={globalStyles.tertiaryButtonText}>Add a new book </Text>
         </Pressable>
       </View>
 
@@ -120,7 +128,18 @@ const AllBooks = () => {
           <Text>No books found.</Text>
         </View>
       ) : (
-        <View style={styles.marginTop}><BooksGrid books={books} onBookPress={handleBookPress} />
+        <View style={[styles.marginTop, styles.booksGridWrapper]}>
+          <BooksGrid books={books.slice(0, visibleCount)} onBookPress={handleBookPress} />
+
+          {visibleCount < books.length && (
+            <View style={styles.loadMoreWrapper}>
+              <Pressable onPress={handleLoadMore}
+                style={({ pressed }) => [
+                  globalStyles.tertiaryButton, pressed && globalStyles.tertiaryButtonPressed,]}>
+                <Text style={globalStyles.tertiaryButtonText}>Load more books </Text>
+              </Pressable>
+            </View>
+          )}
         </View>
       )}
     </View>
@@ -180,5 +199,12 @@ const styles = StyleSheet.create({
   },
   marginTop:{
     marginTop: 8,
-  }
-})
+  },
+  booksGridWrapper: {
+    flex: 1,
+  },
+  loadMoreWrapper: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+});

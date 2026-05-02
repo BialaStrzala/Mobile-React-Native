@@ -17,6 +17,7 @@ interface BookDetails {
   readingCount: number;
   planningCount: number;
   finishedCount: number;
+  discontinuedCount: number;
 }
 
 interface UserBookData {
@@ -47,8 +48,6 @@ const BookDetails = () => {
 
       const userBookData = await checkUserHasBook(bookId);
       setUserBook(userBookData);
-      console.log("User book:", userBook);
-      console.log("User book data:", userBookData);
     } catch (err) {
       console.error("Error loading book details:", err);
     } finally {
@@ -62,7 +61,7 @@ const BookDetails = () => {
       router.push({
         pathname: "/(app)/(tabs)/editbook",
         params: {
-          bookId: userBook.id,
+          bookId: bookDetails?.id,
           title: bookDetails?.title,
           author: bookDetails?.author,
           status: userBook.status,
@@ -176,6 +175,12 @@ const BookDetails = () => {
             <FontAwesome name="check-circle" size={20} color={colors.colorGreen} />
             <Text style={styles.statNumber}>{bookDetails.finishedCount}</Text>
             <Text style={styles.statLabel}>Finished</Text>
+          </View>
+
+          <View style={styles.statItem}>
+            <FontAwesome name="times-circle" size={20} color={colors.colorRed} />
+            <Text style={styles.statNumber}>{bookDetails.discontinuedCount}</Text>
+            <Text style={styles.statLabel}>Discontinued</Text>
           </View>
         </View>
       </View>

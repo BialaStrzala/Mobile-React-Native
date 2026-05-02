@@ -48,7 +48,7 @@ const StatisticsBox: React.FC<StatisticsBoxProps> = ({
                 <View style={styles.statBox}>
                     <FontAwesome name="times-circle" size={20} color={colors.colorRed} />
                     <Text style={styles.statBoxValue}>{discontinuedCount}</Text>
-                    <Text style={styles.statBoxLabel}>Dropped</Text>
+                    <Text style={styles.statBoxLabel}>Discontinued</Text>
                 </View>
             </View>
 

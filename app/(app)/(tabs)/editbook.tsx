@@ -70,12 +70,12 @@ const EditBook = () => {
 
   const handleDelete = () => {
     Alert.alert(
-      'Delete Book',
+      'Remove Book',
       'Are you sure you want to remove this book from your list?',
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Delete',
+          text: 'Remove',
           style: 'destructive',
           onPress: async () => {
             try {

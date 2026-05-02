@@ -132,6 +132,7 @@ const BooksGrid: React.FC<BooksGridProps> = ({
 
   return (
     <FlatList
+      style={styles.list}
       data={rows}
       renderItem={renderRow}
       keyExtractor={(_, index) => `row-${index}`}
@@ -206,6 +207,9 @@ const styles = StyleSheet.create({
   bookAuthor: {
     fontSize: 10,
     color: "#666",
+  },
+  list: {
+    flex: 1,
   },
 });
 

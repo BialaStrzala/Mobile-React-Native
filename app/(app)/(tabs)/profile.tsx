@@ -69,7 +69,8 @@ const ProfileScreen = () => {
                 .single();
 
             setUserBookData(books || []);
-            setLatestBookData(latestBook || null);
+            setLatestBookData(latestBook);
+            //console.log("Latest book data:", latestBook);
         } catch (err) {
             console.error("Error loading profile:", err);
         } finally {

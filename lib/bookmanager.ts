@@ -275,6 +275,7 @@ export const getBookDetails = async (bookId: number) => {
     const readingCount = userBooks?.filter(ub => ub.status === "Reading").length || 0;
     const planningCount = userBooks?.filter(ub => ub.status === "Planning").length || 0;
     const finishedCount = userBooks?.filter(ub => ub.status === "Finished").length || 0;
+    const discontinuedCount = userBooks?.filter(ub => ub.status === "Discontinued").length || 0;
 
     return {
         ...book,
@@ -283,6 +284,7 @@ export const getBookDetails = async (bookId: number) => {
         readingCount,
         planningCount,
         finishedCount,
+        discontinuedCount,
     };
 };
 
